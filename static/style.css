@@ -1,0 +1,156 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    padding-top: 2em;
+}
+
+.container {
+    text-align: center;
+    padding: 2em;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    position: relative;
+    
+}
+
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 1em;
+    color: #4CAF50;
+}
+
+.form {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5em;
+}
+
+.input-text {
+    padding: 0.75em;
+    font-size: 1em;
+    width: 250px;
+    margin-right: 1em;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    transition: border 0.3s;
+}
+
+.input-text:focus {
+    border: 1px solid #4CAF50;
+    outline: none;
+}
+
+.button {
+    padding: 0.75em 1.5em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    border-radius: 20px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #45a049;
+}
+
+.ideas-container {
+    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.idea-options {
+    text-align: left;
+    display: inline-block;
+    margin-top: 1em;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 80%;
+}
+
+#result {
+    margin-top: 1em;
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 1em;
+}
+
+/* New CSS for Detail Suggestions Text */
+.detail-suggestions-text {
+    font-size: 1em; /* Smaller font size */
+    color: #555; /* Softer color */
+    margin-top: 1em;
+    line-height: 1.6; /* Added line-height for better readability */
+    text-align: left; /* Ensuring the text is aligned properly */
+    width: 99%; /* Align the width with the idea options */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px; /* Padding for spacing around text */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background to make text stand out */
+}
+
+.stop-btn,
+.detail-btn {
+    margin-top: 1em;
+    padding: 0.5em 1em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.stop-btn:hover,
+.detail-btn:hover {
+    background-color: #45a049;
+}
+
+.stop-btn {
+    background-color: #f44336;
+    position: relative;
+    margin-top: 1em;
+    align-self: flex-end; /* Align stop button to the right */
+}
+
+.stop-btn:hover {
+    background-color: #e53935;
+}
+
+#detail-btn {
+    background-color: #2196F3;
+    margin-top: 1em;
+    align-self: flex-end; /* Align detail button to the right */
+}
+
+#detail-btn:hover {
+    background-color: #1976D2;
+}
+
+#stop-btn {
+    display: none;
+    margin-top: 1em;
+    align-self: flex-end;
+}
+
+#detail-btn {
+    display: none;
+    margin-top: 1em;
+    align-self: flex-end;
+}

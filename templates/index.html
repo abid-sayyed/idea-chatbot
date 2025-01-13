@@ -1,0 +1,269 @@
+<!-- @format -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Project Idea Generator</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Project Idea Generator</h1>
+
+      <form id="chat-form" class="form">
+        <input
+          type="text"
+          name="user_input"
+          id="user_input"
+          placeholder="Enter a topic or keywords"
+          class="input-text"
+        />
+        <button type="submit" class="button">Generate Idea</button>
+      </form>
+
+      <!-- Ideas container that will show the generated ideas -->
+      <div id="ideas-container" class="ideas-container" style="display: none">
+        <h3>Please choose ideas from the list below:</h3>
+        <div id="idea-options" class="idea-options">
+          <!-- Dynamically populated checkboxes for project ideas -->
+        </div>
+        <button id="detail-btn" class="detail-btn" style="display: none">
+          Detail Suggestions
+        </button>
+      </div>
+
+      <!-- Result display -->
+      <div id="result" class="result"></div>
+
+      <!-- Detail suggestions text (only visible after user selects ideas) -->
+      <div
+        id="detail-suggestions"
+        class="detail-suggestions-text"
+        style="display: none"
+      >
+        <!-- Dynamic detail suggestions will go here -->
+      </div>
+    </div>
+
+    <script>
+      let hasGeneratedDetails = false;
+      // Check if we're using the real API or dummy data for testing
+      const isTesting = false;
+
+      document
+        .getElementById("chat-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          document.getElementById("idea-options").innerHTML = "";
+          document.getElementById("detail-suggestions").innerHTML = "";
+
+          const formData = new FormData(this);
+
+          if (isTesting) {
+            // Using dummy test data for both ideas and detailed suggestions
+            const testResponse = {
+              idea: "1. A meditation app with rewards.\n2. Grocery delivery for special diets.\n3. Subscription service for AI-generated art.",
+            };
+            handleApiResponse(testResponse);
+          } else {
+            // Real API request
+            const response = await fetch("/", {
+              method: "POST",
+              body: formData,
+            });
+            const data = await response.json();
+            handleApiResponse(data);
+          }
+        });
+
+      function handleApiResponse(data) {
+        // Clear previous results and reset UI
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("idea-options").innerHTML = "";
+        document.getElementById("detail-btn").style.display = "none";
+        document.getElementById("ideas-container").style.display = "none"; // Hide idea options by default
+
+        if (data.idea) {
+          if (data.idea.includes("Apologies") || data.idea.includes("Error")) {
+            // If there is an error message, display it and do not generate ideas
+            document.getElementById("result").innerHTML = data.idea;
+          } else {
+            // If there is no error, display ideas
+            displayIdeas(data.idea);
+          }
+        } else {
+          document.getElementById("result").innerHTML =
+            "An unexpected error occurred.";
+        }
+
+        // Handle detailed suggestions (only after "Detail Suggestions" button is clicked)
+        hasGeneratedDetails = false;
+      }
+
+      // Display generated project ideas as checkboxes
+      function displayIdeas(ideas) {
+        const ideasArray = ideas
+          .split("\n")
+          .filter((idea) => idea.trim().length > 0);
+        ideasArray.forEach((idea, index) => {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = `idea-${index}`;
+          checkbox.name = "selected_idea";
+          checkbox.value = idea;
+
+          const label = document.createElement("label");
+          label.htmlFor = checkbox.id;
+          label.innerText = idea;
+
+          const container = document.createElement("div");
+          container.appendChild(checkbox);
+          container.appendChild(label);
+
+          document.getElementById("idea-options").appendChild(container);
+        });
+
+        // Show the choices and button for details
+        document.getElementById("ideas-container").style.display = "block";
+        document.getElementById("detail-btn").style.display = "inline-block";
+      }
+
+      // Get selected ideas and request detailed suggestions
+      document
+        .getElementById("detail-btn")
+        .addEventListener("click", async function () {
+          if (hasGeneratedDetails) {
+            const userConfirmed = confirm(
+              "Do you want to generate the details again?"
+            );
+            if (!userConfirmed) {
+              return;
+            } else {
+              document.getElementById("detail-suggestions").innerHTML = "";
+            }
+          }
+
+          const selectedIdeas = [];
+          const checkboxes = document.querySelectorAll(
+            'input[name="selected_idea"]:checked'
+          );
+          checkboxes.forEach((checkbox) => selectedIdeas.push(checkbox.value));
+
+          if (selectedIdeas.length > 0) {
+            if (isTesting) {
+              // Dummy detailed suggestions for testing mode
+              const testSuggestions = [
+                "Meditation app with rewards: Implement a reward system that encourages users to meditate daily. You can integrate gamification elements like badges and points.",
+                "Grocery delivery for special diets: Focus on the convenience of ordering meals that meet specific dietary needs like keto, vegan, or gluten-free.",
+                "Subscription service for AI-generated art: Offer a subscription service where users receive exclusive, AI-generated artwork based on their preferences.",
+              ];
+              // Display the dummy suggestions
+              document.getElementById("detail-suggestions").innerHTML =
+                testSuggestions.join("<br>");
+            } else {
+              // Real API request for detailed suggestions
+              const response = await fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ selected_ideas: selectedIdeas }),
+              });
+
+              document.getElementById("detail-suggestions").style.display =
+                "block";
+              document.getElementById("result").innerHTML = "";
+              const suggestionContainer =
+                document.getElementById("detail-suggestions");
+              const reader = response.body.getReader();
+              let output = "";
+
+              const decoder = new TextDecoder();
+              while (true) {
+                const { done, value } = await reader.read();
+
+                if (value) {
+                  output += decoder.decode(value, { stream: true });
+
+                  const formattedOutput = formatDynamicText(output);
+                  suggestionContainer.innerHTML = formattedOutput;
+                }
+
+                if (done) {
+                  hasGeneratedDetails = true;
+                  document.getElementById("result").innerHTML = "";
+                  return;
+                }
+              }
+            }
+          } else {
+            document.getElementById("result").innerHTML =
+              "Please select at least one idea.";
+            hasGeneratedDetails = false;
+          }
+        });
+
+      // Function to format the dynamic text
+      function formatDynamicText(text) {
+        let formattedText = text;
+      
+        // Add section titles with tight spacing to their content but margin between sections
+        formattedText = formattedText.replace(
+          /# \*\*(.*?)\*\*/g,
+          "<h2 style='font-size: 26px; font-weight: bold; margin-top: 30px; margin-bottom: 0px;'>$1</h2>"
+        );
+      
+        // Format main section headers with no bottom margin
+        formattedText = formattedText.replace(
+          /\*\*Description:\*\*/g,
+          "<div class='section' style='margin-top: 30px;'><p style='font-weight: bold; margin: 0; font-size: 18px;'>Description:</p>"
+        );
+        
+        formattedText = formattedText.replace(
+          /\*\*Key Features:\*\*/g,
+          "<div class='section' style='margin-top: 30px;'><p style='font-weight: bold; margin: 0; font-size: 18px;'>Key Features:</p>"
+        );
+        
+        formattedText = formattedText.replace(
+          /\*\*Technologies\/Tools:\*\*/g,
+          "<div class='section' style='margin-top: 30px;'><p style='font-weight: bold; margin: 0; font-size: 18px;'>Technologies/Tools:</p>"
+        );
+        
+        formattedText = formattedText.replace(
+          /\*\*Potential Challenges:\*\*/g,
+          "<div class='section' style='margin-top: 30px;'><p style='font-weight: bold; margin: 0; font-size: 18px;'>Potential Challenges:</p>"
+        );
+      
+        // Close div sections
+        formattedText = formattedText.replace(
+          /(?=<div class='section'|$)/g,
+          "</div>"
+        );
+      
+        // Remove first closing div (which appears before any content)
+        formattedText = formattedText.replace("</div>", "");
+      
+        // Handle line breaks while preserving section spacing
+        formattedText = formattedText.replace(/(\n\s*){2,}/g, "\n");
+      
+        // Format bullet points with tight spacing within sections
+        formattedText = formattedText.replace(
+          /\* \*\*(.*?)\*\*/g,
+          "<li style='margin-top: 5px; margin-bottom: 0px;'><strong>$1</strong></li>"
+        );
+      
+        // Wrap lists in ul tags with proper spacing
+        formattedText = formattedText.replace(
+          /(<li.*?>.*?<\/li>)+/g,
+          "<ul style='margin-top: 5px; margin-bottom: 10px; font-size: 14px;'>$&</ul>"
+        );
+      
+        // Clean up any potential double-spacing issues
+        formattedText = formattedText.replace(/\s+<\/div>/g, "</div>");
+        formattedText = formattedText.replace(/>\s+</g, "><");
+      
+        return formattedText;
+      }
+    </script>
+  </body>
+</html>

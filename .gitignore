@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+.env/
+
+# Flask / Django settings
+instance/
+.pytest_cache/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+.env.local
+
+# Bytecode files
+*.pyc
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Test Coverage
+.coverage
+coverage.xml
+nosetests.xml
+test-*.xml
